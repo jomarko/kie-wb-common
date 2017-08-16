@@ -27,7 +27,7 @@ import javax.inject.Inject;
 import com.google.gwt.logging.client.LogConfiguration;
 import com.google.gwt.user.client.ui.IsWidget;
 import org.kie.workbench.common.dmn.api.qualifiers.DMNEditor;
-import org.kie.workbench.common.dmn.client.commands.NavigateToExpressionEditorCommand;
+import org.kie.workbench.common.dmn.client.commands.general.NavigateToExpressionEditorCommand;
 import org.kie.workbench.common.dmn.client.editors.expressions.ExpressionEditorView;
 import org.kie.workbench.common.dmn.client.events.EditExpressionEvent;
 import org.kie.workbench.common.dmn.showcase.client.screens.ShowcaseDiagramService;

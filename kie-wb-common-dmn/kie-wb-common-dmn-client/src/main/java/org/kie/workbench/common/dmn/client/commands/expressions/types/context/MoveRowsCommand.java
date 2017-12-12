@@ -45,7 +45,6 @@ import org.kie.workbench.common.stunner.core.rule.RuleViolation;
 import org.uberfire.ext.wires.core.grids.client.model.GridCell;
 import org.uberfire.ext.wires.core.grids.client.model.GridCellValue;
 import org.uberfire.ext.wires.core.grids.client.model.GridRow;
-import org.uberfire.ext.wires.core.grids.client.widget.grid.columns.RowNumberColumn;
 
 public class MoveRowsCommand extends AbstractCanvasGraphCommand implements VetoExecutionCommand,
                                                                            VetoUndoCommand {
@@ -136,7 +135,7 @@ public class MoveRowsCommand extends AbstractCanvasGraphCommand implements VetoE
             public CommandResult<CanvasViolation> execute(final AbstractCanvasHandler ach) {
                 uiModel.moveRowsTo(index,
                                    uiRows);
-                CommandUtils.updateRowNumbers(uiModel, RowNumberColumn.class, IntStream.range(0, uiModel.getRowCount() - 1));
+                CommandUtils.updateRowNumbers(uiModel, IntStream.range(0, uiModel.getRowCount() - 1));
                 updateParentInformation();
 
                 canvasOperation.execute();
@@ -148,7 +147,7 @@ public class MoveRowsCommand extends AbstractCanvasGraphCommand implements VetoE
             public CommandResult<CanvasViolation> undo(final AbstractCanvasHandler ach) {
                 uiModel.moveRowsTo(oldIndex,
                                    uiRows);
-                CommandUtils.updateRowNumbers(uiModel, RowNumberColumn.class, IntStream.range(0, uiModel.getRowCount() - 1));
+                CommandUtils.updateRowNumbers(uiModel, IntStream.range(0, uiModel.getRowCount() - 1));
                 updateParentInformation();
 
                 canvasOperation.execute();

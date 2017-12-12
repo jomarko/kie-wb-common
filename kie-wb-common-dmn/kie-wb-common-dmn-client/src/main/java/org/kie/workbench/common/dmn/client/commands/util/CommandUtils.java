@@ -20,18 +20,18 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 
 import org.kie.workbench.common.dmn.client.widgets.grid.model.DMNGridData;
+import org.uberfire.ext.wires.core.grids.client.model.GridColumn;
 import org.uberfire.ext.wires.core.grids.client.model.impl.BaseGridCellValue;
+import org.uberfire.ext.wires.core.grids.client.widget.grid.columns.RowNumberColumn;
 
 public class CommandUtils {
 
-    public static <T> void updateRowNumbers(final DMNGridData uiModel,
-                                            final Class<T> rowNumberColumnClass,
-                                            final IntStream rangeOfRowsToUpdate) {
-        final Optional<T> rowNumberColumn = uiModel
+    public static void updateRowNumbers(final DMNGridData uiModel,
+                                        final IntStream rangeOfRowsToUpdate) {
+        final Optional<GridColumn<?>> rowNumberColumn = uiModel
                 .getColumns()
                 .stream()
-                .filter(c -> rowNumberColumnClass.isInstance(c))
-                .map(c -> rowNumberColumnClass.cast(c))
+                .filter(column -> column instanceof RowNumberColumn)
                 .findFirst();
 
         rowNumberColumn.ifPresent(c -> {

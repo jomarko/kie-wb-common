@@ -26,7 +26,6 @@ import org.kie.workbench.common.dmn.api.definition.v1_1.DecisionTable;
 import org.kie.workbench.common.dmn.client.commands.VetoExecutionCommand;
 import org.kie.workbench.common.dmn.client.commands.VetoUndoCommand;
 import org.kie.workbench.common.dmn.client.commands.util.CommandUtils;
-import org.kie.workbench.common.dmn.client.editors.expressions.types.dtable.DecisionTableRowNumberColumn;
 import org.kie.workbench.common.dmn.client.widgets.grid.model.DMNGridData;
 import org.kie.workbench.common.stunner.core.client.canvas.AbstractCanvasHandler;
 import org.kie.workbench.common.stunner.core.client.canvas.command.AbstractCanvasCommand;
@@ -118,7 +117,7 @@ public class MoveRowsCommand extends AbstractCanvasGraphCommand implements VetoE
             public CommandResult<CanvasViolation> execute(final AbstractCanvasHandler context) {
                 uiModel.moveRowsTo(index,
                                    rows);
-                CommandUtils.updateRowNumbers(uiModel, DecisionTableRowNumberColumn.class, IntStream.range(0, uiModel.getRowCount()));
+                CommandUtils.updateRowNumbers(uiModel, IntStream.range(0, uiModel.getRowCount()));
 
                 canvasOperation.execute();
 
@@ -129,7 +128,7 @@ public class MoveRowsCommand extends AbstractCanvasGraphCommand implements VetoE
             public CommandResult<CanvasViolation> undo(final AbstractCanvasHandler context) {
                 uiModel.moveRowsTo(oldIndex,
                                    rows);
-                CommandUtils.updateRowNumbers(uiModel, DecisionTableRowNumberColumn.class, IntStream.range(0, uiModel.getRowCount()));
+                CommandUtils.updateRowNumbers(uiModel, IntStream.range(0, uiModel.getRowCount()));
 
                 canvasOperation.execute();
 

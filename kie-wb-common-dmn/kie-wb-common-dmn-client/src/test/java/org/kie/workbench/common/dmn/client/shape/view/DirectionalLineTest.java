@@ -70,7 +70,7 @@ public class DirectionalLineTest {
     }
 
     @Test
-    public void testStkipParse() throws Exception {
+    public void testSkipParse() throws Exception {
         final Attributes attr = mock(Attributes.class);
         final Point2DArray points = new Point2DArray();
         when(attr.getControlPoints()).thenReturn(points);

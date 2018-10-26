@@ -34,11 +34,13 @@ import org.kie.workbench.common.dmn.api.definition.v1_1.Definitions;
 import org.kie.workbench.common.dmn.api.definition.v1_1.HitPolicy;
 import org.kie.workbench.common.dmn.api.definition.v1_1.InputClause;
 import org.kie.workbench.common.dmn.api.definition.v1_1.InputData;
+import org.kie.workbench.common.dmn.api.definition.v1_1.ItemDefinition;
 import org.kie.workbench.common.dmn.api.definition.v1_1.LiteralExpression;
 import org.kie.workbench.common.dmn.api.definition.v1_1.OutputClause;
 import org.kie.workbench.common.dmn.api.definition.v1_1.UnaryTests;
 import org.kie.workbench.common.dmn.api.property.dmn.Description;
 import org.kie.workbench.common.dmn.api.property.dmn.QName;
+import org.kie.workbench.common.dmn.api.property.dmn.types.BuiltInType;
 import org.kie.workbench.common.dmn.client.editors.expressions.types.ExpressionEditorModelEnricher;
 import org.kie.workbench.common.dmn.client.graph.DMNGraphUtils;
 import org.kie.workbench.common.stunner.core.client.api.SessionManager;
@@ -185,22 +187,32 @@ public class DecisionTableEditorDefinitionEnricher implements ExpressionEditorMo
                                            final Definitions definitions,
                                            final List<InputClauseRequirement> inputClauseRequirements,
                                            final String text) {
-        if (QName.NULL_NS_URI.equals(typeRef.getNamespaceURI()) && QName.DEFAULT_NS_PREFIX.equals(typeRef.getPrefix())) {
-            //Lookup and expand ItemDefinition from the QName's LocalPart
-            definitions.getItemDefinition()
-                    .stream()
-                    .filter(itemDef -> itemDef.getName().getValue().equals(typeRef.getLocalPart()))
-                    .findFirst()
-                    .ifPresent(itemDefinition -> itemDefinition
-                            .getItemComponent()
-                            .forEach(itemDefinitionComponent -> addInputClauseRequirement(itemDefinitionComponent.getTypeRef(),
-                                                                                          definitions,
-                                                                                          inputClauseRequirements,
-                                                                                          text + "." + itemDefinitionComponent.getName().getValue())));
-        } else {
-            inputClauseRequirements.add(new InputClauseRequirement(text,
-                                                                   typeRef));
+        //TypeRef matches a BuiltInType
+        for (BuiltInType bi : BuiltInType.values()) {
+            for (String biName : bi.getNames()) {
+                if (biName.equals(typeRef.getLocalPart())) {
+                    inputClauseRequirements.add(new InputClauseRequirement(text, typeRef));
+                    return;
+                }
+            }
         }
+
+        //Otherwise lookup and expand ItemDefinition from the QName's LocalPart
+        final Optional<ItemDefinition> oItemDefinition = definitions.getItemDefinition()
+                .stream()
+                .filter(itemDef -> itemDef.getName().getValue().equals(typeRef.getLocalPart()))
+                .findFirst();
+        oItemDefinition.ifPresent(itemDefinition -> {
+            if (itemDefinition.getItemComponent().size() == 0) {
+                inputClauseRequirements.add(new InputClauseRequirement(text, itemDefinition.getTypeRef()));
+            } else {
+                itemDefinition.getItemComponent()
+                        .forEach(itemDefinitionComponent -> addInputClauseRequirement(itemDefinitionComponent.getTypeRef(),
+                                                                                      definitions,
+                                                                                      inputClauseRequirements,
+                                                                                      text + "." + itemDefinitionComponent.getName().getValue()));
+            }
+        });
     }
 
     void enrichOutputClauses(final DecisionTable dtable) {

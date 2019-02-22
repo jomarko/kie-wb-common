@@ -16,8 +16,6 @@
 
 package org.kie.workbench.common.stunner.core.client.components.layout;
 
-import javax.inject.Inject;
-
 import org.kie.workbench.common.stunner.core.client.canvas.util.CanvasLayoutUtils;
 import org.kie.workbench.common.stunner.core.diagram.Diagram;
 import org.kie.workbench.common.stunner.core.graph.Graph;
@@ -25,19 +23,14 @@ import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.Bounds;
 import org.kie.workbench.common.stunner.core.graph.content.HasBounds;
 import org.kie.workbench.common.stunner.core.graph.processing.layout.Layout;
-import org.kie.workbench.common.stunner.core.graph.processing.layout.LayoutExecutor;
 import org.kie.workbench.common.stunner.core.graph.processing.layout.LayoutService;
 
-public final class LayoutHelper {
+public abstract class LayoutExecutor {
 
     private final LayoutService layoutService;
-    private final LayoutExecutor layoutExecutor;
 
-    @Inject
-    public LayoutHelper(final LayoutService layoutService,
-                        final LayoutExecutor layoutExecutor) {
+    public LayoutExecutor(final LayoutService layoutService) {
         this.layoutService = layoutService;
-        this.layoutExecutor = layoutExecutor;
     }
 
     public void applyLayout(final Diagram diagram) {
@@ -49,7 +42,7 @@ public final class LayoutHelper {
         final Graph<?, Node> graph = diagram.getGraph();
         if (graph != null && (overrideCurrentLayout || !this.layoutService.hasLayoutInformation(graph))) {
             final Layout layout = this.layoutService.createLayout(graph);
-            this.layoutExecutor.applyLayout(layout, graph);
+            applyLayout(layout, graph);
 
             for (final Node node : graph.nodes()) {
                 if (CanvasLayoutUtils.isCanvasRoot(diagram, node)) {
@@ -61,11 +54,5 @@ public final class LayoutHelper {
         }
     }
 
-    public LayoutService getLayoutService() {
-        return this.layoutService;
-    }
-
-    public LayoutExecutor getExecutor() {
-        return this.layoutExecutor;
-    }
+    protected abstract void applyLayout(final Layout layout, final Graph graph);
 }

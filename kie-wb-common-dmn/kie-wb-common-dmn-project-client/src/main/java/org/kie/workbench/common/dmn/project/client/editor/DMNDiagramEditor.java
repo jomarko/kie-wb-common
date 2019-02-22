@@ -42,7 +42,7 @@ import org.kie.workbench.common.stunner.core.client.api.SessionManager;
 import org.kie.workbench.common.stunner.core.client.canvas.AbstractCanvasHandler;
 import org.kie.workbench.common.stunner.core.client.canvas.CanvasHandler;
 import org.kie.workbench.common.stunner.core.client.command.SessionCommandManager;
-import org.kie.workbench.common.stunner.core.client.components.layout.LayoutHelper;
+import org.kie.workbench.common.stunner.core.client.components.layout.LayoutExecutor;
 import org.kie.workbench.common.stunner.core.client.error.DiagramClientErrorHandler;
 import org.kie.workbench.common.stunner.core.client.i18n.ClientTranslationService;
 import org.kie.workbench.common.stunner.core.client.session.Session;
@@ -93,7 +93,7 @@ public class DMNDiagramEditor extends AbstractProjectDiagramEditor<DMNDiagramRes
     private final SessionCommandManager<AbstractCanvasHandler> sessionCommandManager;
     private final Event<RefreshFormPropertiesEvent> refreshFormPropertiesEvent;
     private final DecisionNavigatorDock decisionNavigatorDock;
-    private final LayoutHelper layoutHelper;
+    private final LayoutExecutor layoutExecutor;
     private final DataTypesPage dataTypesPage;
 
     @Inject
@@ -119,7 +119,7 @@ public class DMNDiagramEditor extends AbstractProjectDiagramEditor<DMNDiagramRes
                             final SessionManager sessionManager,
                             final @Session SessionCommandManager<AbstractCanvasHandler> sessionCommandManager,
                             final DecisionNavigatorDock decisionNavigatorDock,
-                            final LayoutHelper layoutHelper,
+                            final LayoutExecutor layoutExecutor,
                             final DataTypesPage dataTypesPage) {
         super(view,
               documentationView,
@@ -143,7 +143,7 @@ public class DMNDiagramEditor extends AbstractProjectDiagramEditor<DMNDiagramRes
         this.sessionCommandManager = sessionCommandManager;
         this.refreshFormPropertiesEvent = refreshFormPropertiesEvent;
         this.decisionNavigatorDock = decisionNavigatorDock;
-        this.layoutHelper = layoutHelper;
+        this.layoutExecutor = layoutExecutor;
         this.dataTypesPage = dataTypesPage;
     }
 
@@ -171,7 +171,7 @@ public class DMNDiagramEditor extends AbstractProjectDiagramEditor<DMNDiagramRes
 
     @Override
     public void open(final ProjectDiagram diagram) {
-        this.layoutHelper.applyLayout(diagram);
+        this.layoutExecutor.applyLayout(diagram);
         super.open(diagram);
     }
 

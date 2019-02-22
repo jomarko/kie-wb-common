@@ -33,7 +33,7 @@ import org.kie.workbench.common.dmn.project.client.type.DMNDiagramResourceType;
 import org.kie.workbench.common.stunner.core.client.api.SessionManager;
 import org.kie.workbench.common.stunner.core.client.canvas.AbstractCanvasHandler;
 import org.kie.workbench.common.stunner.core.client.command.SessionCommandManager;
-import org.kie.workbench.common.stunner.core.client.components.layout.LayoutHelper;
+import org.kie.workbench.common.stunner.core.client.components.layout.LayoutExecutor;
 import org.kie.workbench.common.stunner.core.documentation.DocumentationView;
 import org.kie.workbench.common.stunner.forms.client.event.RefreshFormPropertiesEvent;
 import org.kie.workbench.common.stunner.project.client.editor.AbstractProjectDiagramEditor;
@@ -93,7 +93,7 @@ public class DMNDiagramEditorTest extends AbstractProjectDiagramEditorTest {
     private DMNProjectEditorMenuSessionItems dmnProjectMenuSessionItems;
 
     @Mock
-    private LayoutHelper layoutHelper;
+    private LayoutExecutor layoutHelper;
 
     @Mock
     private DataTypesPage dataTypesPage;

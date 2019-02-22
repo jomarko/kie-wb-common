@@ -26,7 +26,6 @@ import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.Bound;
 import org.kie.workbench.common.stunner.core.graph.content.Bounds;
 import org.kie.workbench.common.stunner.core.graph.content.HasBounds;
-import org.kie.workbench.common.stunner.core.graph.processing.layout.LayoutExecutor;
 import org.kie.workbench.common.stunner.core.graph.processing.layout.LayoutService;
 import org.kie.workbench.common.stunner.core.graph.store.GraphNodeStoreImpl;
 import org.mockito.ArgumentCaptor;
@@ -115,8 +114,8 @@ public class LayoutHelperTest {
     @Test
     public void applyLayout() {
 
-        final LayoutHelper helper = new LayoutHelper(layoutService, layoutExecutor);
-        helper.applyLayout(diagram);
+//        final LayoutExecutor helper = new LayoutExecutor(layoutService, layoutExecutor);
+//        helper.applyLayout(diagram);
         verify(rootNodeContent).setBounds(argumentCaptor.capture());
 
         final Bounds bounds = argumentCaptor.getValue();
@@ -128,8 +127,8 @@ public class LayoutHelperTest {
     @Test
     public void applyLayoutDoNotOverrideExistingLayout() {
         when(layoutService.hasLayoutInformation(graph)).thenReturn(true);
-        final LayoutHelper helper = new LayoutHelper(layoutService, layoutExecutor);
-        helper.applyLayout(diagram, false);
+//        final LayoutExecutor helper = new LayoutExecutor(layoutService, layoutExecutor);
+//        helper.applyLayout(diagram, false);
 
         verify(layoutExecutor, never()).applyLayout(any(), any());
     }
@@ -137,8 +136,8 @@ public class LayoutHelperTest {
     @Test
     public void applyLayoutOverrideExistingLayout() {
         when(layoutService.hasLayoutInformation(graph)).thenReturn(true);
-        final LayoutHelper helper = new LayoutHelper(layoutService, layoutExecutor);
-        helper.applyLayout(diagram, true);
+//        final LayoutExecutor helper = new LayoutExecutor(layoutService, layoutExecutor);
+//        helper.applyLayout(diagram, true);
 
         verify(layoutExecutor).applyLayout(any(), any());
     }

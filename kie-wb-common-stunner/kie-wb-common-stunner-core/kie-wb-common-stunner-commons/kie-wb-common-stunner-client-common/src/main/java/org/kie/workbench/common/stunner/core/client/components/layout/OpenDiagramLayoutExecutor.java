@@ -28,7 +28,7 @@ import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.Bounds;
 import org.kie.workbench.common.stunner.core.graph.content.HasBounds;
 import org.kie.workbench.common.stunner.core.graph.processing.layout.Layout;
-import org.kie.workbench.common.stunner.core.graph.processing.layout.LayoutExecutor;
+import org.kie.workbench.common.stunner.core.graph.processing.layout.LayoutService;
 import org.kie.workbench.common.stunner.core.graph.processing.layout.VertexPosition;
 import org.kie.workbench.common.stunner.core.i18n.CoreTranslationMessages;
 import org.uberfire.workbench.events.NotificationEvent;
@@ -37,13 +37,20 @@ import org.uberfire.workbench.events.NotificationEvent;
  * Copies the layout information to a recently opened diagram without layout information.
  */
 @Default
-public final class OpenDiagramLayoutExecutor implements LayoutExecutor {
+public final class OpenDiagramLayoutExecutor extends LayoutExecutor {
 
-    @Inject
     private Event<NotificationEvent> event;
 
-    @Inject
     private ClientTranslationService translationService;
+
+    @Inject
+    public OpenDiagramLayoutExecutor(final LayoutService layoutService,
+                                     final Event<NotificationEvent> event,
+                                     final ClientTranslationService translationService) {
+        super(layoutService);
+        this.event = event;
+        this.translationService = translationService;
+    }
 
     @Override
     public void applyLayout(final Layout layout,

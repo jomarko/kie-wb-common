@@ -36,7 +36,7 @@ import org.kie.workbench.common.stunner.client.widgets.presenters.session.impl.S
 import org.kie.workbench.common.stunner.client.widgets.views.session.ScreenPanelView;
 import org.kie.workbench.common.stunner.core.client.api.SessionManager;
 import org.kie.workbench.common.stunner.core.client.canvas.AbstractCanvasHandler;
-import org.kie.workbench.common.stunner.core.client.components.layout.LayoutHelper;
+import org.kie.workbench.common.stunner.core.client.components.layout.LayoutExecutor;
 import org.kie.workbench.common.stunner.core.client.session.impl.EditorSession;
 import org.kie.workbench.common.stunner.core.diagram.Diagram;
 import org.kie.workbench.common.stunner.core.diagram.Metadata;
@@ -94,7 +94,7 @@ public class SessionDiagramEditorScreenTest {
     private ArgumentCaptor<Consumer<EditorSession>> clientFullSessionConsumer;
 
     @Mock
-    private LayoutHelper layoutHelper;
+    private LayoutExecutor layoutHelper;
 
     @Mock
     private KieEditorWrapperView kieView;

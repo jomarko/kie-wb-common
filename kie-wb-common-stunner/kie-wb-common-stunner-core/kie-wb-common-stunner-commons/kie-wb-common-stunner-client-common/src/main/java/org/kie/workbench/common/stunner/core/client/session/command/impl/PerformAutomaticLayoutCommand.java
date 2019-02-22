@@ -20,24 +20,23 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Default;
 import javax.inject.Inject;
 
-import org.kie.workbench.common.stunner.core.client.components.layout.LayoutHelper;
-import org.kie.workbench.common.stunner.core.client.components.layout.UndoableLayoutExecutor;
+import org.kie.workbench.common.stunner.core.client.components.layout.LayoutExecutor;
+import org.kie.workbench.common.stunner.core.client.components.layout.qualifier.UndoableLayout;
 import org.kie.workbench.common.stunner.core.client.session.ClientSession;
 import org.kie.workbench.common.stunner.core.client.session.command.AbstractClientSessionCommand;
 import org.kie.workbench.common.stunner.core.client.session.impl.EditorSession;
 import org.kie.workbench.common.stunner.core.diagram.Diagram;
-import org.kie.workbench.common.stunner.core.graph.processing.layout.LayoutService;
 
 @Dependent
 @Default
 public class PerformAutomaticLayoutCommand extends AbstractClientSessionCommand<EditorSession> {
 
-    private final LayoutService layoutService;
+    private final LayoutExecutor layoutExecutor;
 
     @Inject
-    public PerformAutomaticLayoutCommand(final LayoutService layoutService) {
+    public PerformAutomaticLayoutCommand(@UndoableLayout final LayoutExecutor layoutExecutor) {
         super(true);
-        this.layoutService = layoutService;
+        this.layoutExecutor = layoutExecutor;
     }
 
     @Override
@@ -48,20 +47,10 @@ public class PerformAutomaticLayoutCommand extends AbstractClientSessionCommand<
     @Override
     public <V> void execute(final Callback<V> callback) {
         final Diagram diagram = getDiagram();
-        final UndoableLayoutExecutor executor = makeExecutor();
-        final LayoutHelper layoutHelper = makeLayoutHelper(executor);
 
-        layoutHelper.applyLayout(diagram, true);
+        layoutExecutor.applyLayout(diagram, true);
 
         callback.onSuccess();
-    }
-
-    LayoutHelper makeLayoutHelper(final UndoableLayoutExecutor executor) {
-        return new LayoutHelper(layoutService, executor);
-    }
-
-    UndoableLayoutExecutor makeExecutor() {
-        return new UndoableLayoutExecutor(getCanvasHandler(), getSession().getCommandManager());
     }
 
     Diagram getDiagram() {

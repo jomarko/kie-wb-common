@@ -16,27 +16,36 @@
 
 package org.kie.workbench.common.stunner.core.client.components.layout;
 
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+
 import org.kie.workbench.common.stunner.core.client.canvas.AbstractCanvasHandler;
 import org.kie.workbench.common.stunner.core.client.canvas.command.UpdateElementPositionCommand;
 import org.kie.workbench.common.stunner.core.client.command.CanvasCommandManager;
 import org.kie.workbench.common.stunner.core.client.command.CanvasViolation;
+import org.kie.workbench.common.stunner.core.client.components.layout.qualifier.UndoableLayout;
 import org.kie.workbench.common.stunner.core.command.impl.CompositeCommand;
 import org.kie.workbench.common.stunner.core.graph.Graph;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.processing.layout.Layout;
-import org.kie.workbench.common.stunner.core.graph.processing.layout.LayoutExecutor;
+import org.kie.workbench.common.stunner.core.graph.processing.layout.LayoutService;
 import org.kie.workbench.common.stunner.core.graph.processing.layout.VertexPosition;
 
 /**
  * Copies the layout information to a diagram in a way that it can be reversible.
  */
-public class UndoableLayoutExecutor implements LayoutExecutor {
+@Dependent
+@UndoableLayout
+public final class UndoableLayoutExecutor extends LayoutExecutor {
 
     private final AbstractCanvasHandler canvasHandler;
     private final CanvasCommandManager<AbstractCanvasHandler> commandManager;
 
-    public UndoableLayoutExecutor(final AbstractCanvasHandler canvasHandler,
+    @Inject
+    public UndoableLayoutExecutor(final LayoutService layoutService,
+                                  final AbstractCanvasHandler canvasHandler,
                                   final CanvasCommandManager<AbstractCanvasHandler> commandManager) {
+        super(layoutService);
         this.canvasHandler = canvasHandler;
         this.commandManager = commandManager;
     }

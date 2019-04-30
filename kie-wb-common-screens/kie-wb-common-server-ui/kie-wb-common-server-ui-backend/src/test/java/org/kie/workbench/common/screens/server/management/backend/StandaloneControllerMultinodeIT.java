@@ -28,6 +28,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.jboss.arquillian.container.test.api.ContainerController;
+import org.jboss.arquillian.container.test.api.Deployer;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
@@ -48,6 +49,8 @@ import org.kie.server.controller.api.model.events.ServerInstanceUpdated;
 import org.kie.server.controller.api.model.events.ServerTemplateDeleted;
 import org.kie.server.controller.api.model.events.ServerTemplateUpdated;
 import org.kie.server.controller.api.model.runtime.ServerInstanceKeyList;
+import org.kie.server.controller.api.model.spec.ServerTemplate;
+import org.kie.server.controller.api.model.spec.ServerTemplateList;
 import org.kie.server.controller.client.KieServerControllerClientFactory;
 import org.kie.server.controller.client.event.EventHandler;
 import org.kie.server.controller.client.websocket.WebSocketKieServerControllerClient;
@@ -67,21 +70,23 @@ public class StandaloneControllerMultinodeIT extends AbstractControllerIT {
     public static final String SECONDARY_NODE = "wildfly-node2";
     public static final String KIE_SERVER_ID = "wildfly-multinode-kie-server";
 
-
-    @Deployment(name = "workbench", order = 2)
-    @TargetsContainer(PRIMARY_NODE)
-    public static WebArchive createWorkbenchWarDeployment() {
-        return createWorkbenchWar();
-    }
-
-    @Deployment(name = "kie-server", order = 3, testable = false)
+    @Deployment(name = "kie-server", order = 1, testable = false, managed = false)
     @TargetsContainer(SECONDARY_NODE)
     public static WebArchive createKieServerWarDeployment() {
         return createKieServerWar();
     }
 
+    @Deployment(name = "workbench", order = 2, managed = false)
+    @TargetsContainer(PRIMARY_NODE)
+    public static WebArchive createWorkbenchWarDeployment() {
+        return createWorkbenchWar();
+    }
+
     @ArquillianResource
     private ContainerController controller;
+
+    @ArquillianResource
+    private Deployer deployer;
 
     @Before
     public void before() {
@@ -111,11 +116,11 @@ public class StandaloneControllerMultinodeIT extends AbstractControllerIT {
     @Test
     @RunAsClient
     @OperateOnDeployment("workbench")
-    public void testAvailableRestEndpoint(final @ArquillianResource URL baseURL,
-                                          final @ArquillianResource @OperateOnDeployment("kie-server") URL baseServerURL) throws Exception {
-        String url = new URL(baseURL, "websocket/controller").toExternalForm();
+    public void testAvailableRestEndpoint() throws Exception {
+        String url = new URL("http://localhost:8080/workbench/websocket/controller").toExternalForm();
         
-        URL serverUrl = new URL(baseServerURL, "services/rest/server");
+        URL serverUrl = new URL("http://localhost:8230/kie-server/services/rest/server");
+
         CountDownLatch serverDown = new CountDownLatch(1);
         EventHandler customWSEventHandler = new EventHandler () {
 
@@ -157,14 +162,34 @@ public class StandaloneControllerMultinodeIT extends AbstractControllerIT {
             
         };
 
+        deployer.deploy("kie-server");
+        assertTrue(ping(serverUrl));
+
+        // the use of manually deployment is the only way to guarantee that the web context is completely deployed
+        // and not causing a race condition when the controller ping the server and severing the connection
+        deployer.deploy("workbench");
+
         try (WebSocketKieServerControllerClient client = (WebSocketKieServerControllerClient) KieServerControllerClientFactory.newWebSocketClient(url,
                                                                                                                                                   USER,
                                                                                                                                                   PASSWORD,
                                                                                                                                                   customWSEventHandler)) {
-
-            assertTrue(ping(serverUrl));
             // get all the instances connected to the controller
+            int count = 0;
+
+            ServerTemplateList templates = client.listServerTemplates();
+            while (!findServerTemplate(templates.getServerTemplates(), KIE_SERVER_ID)) {
+                Thread.sleep(500L);
+                templates = client.listServerTemplates();
+                LOGGER.info("try #{} templates", ++count);
+            }
+
             ServerInstanceKeyList list = client.getServerInstances(KIE_SERVER_ID);
+            while (list.getServerInstanceKeys().length == 0) {
+                Thread.sleep(500L);
+                list = client.getServerInstances(KIE_SERVER_ID);
+                LOGGER.info("try #{} instances", ++count);
+            }
+
 
             assertEquals(1, list.getServerInstanceKeys().length);
 
@@ -180,6 +205,19 @@ public class StandaloneControllerMultinodeIT extends AbstractControllerIT {
             assertEquals(0, list.getServerInstanceKeys().length);
 
         }
+    }
+
+    private boolean findServerTemplate(ServerTemplate[] templates, String templateId) {
+        if (templates.length == 0) {
+            return false;
+        }
+
+        for (ServerTemplate template : templates) {
+            if (template.getId().equals(templateId)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean ping(URL url) {

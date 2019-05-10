@@ -49,8 +49,6 @@ import org.kie.server.controller.api.model.events.ServerInstanceUpdated;
 import org.kie.server.controller.api.model.events.ServerTemplateDeleted;
 import org.kie.server.controller.api.model.events.ServerTemplateUpdated;
 import org.kie.server.controller.api.model.runtime.ServerInstanceKeyList;
-import org.kie.server.controller.api.model.spec.ServerTemplate;
-import org.kie.server.controller.api.model.spec.ServerTemplateList;
 import org.kie.server.controller.client.KieServerControllerClientFactory;
 import org.kie.server.controller.client.event.EventHandler;
 import org.kie.server.controller.client.websocket.WebSocketKieServerControllerClient;
@@ -118,11 +116,13 @@ public class StandaloneControllerMultinodeIT extends AbstractControllerIT {
     @OperateOnDeployment("workbench")
     public void testAvailableRestEndpoint() throws Exception {
         String url = new URL("http://localhost:8080/workbench/websocket/controller").toExternalForm();
-        
+
         URL serverUrl = new URL("http://localhost:8230/kie-server/services/rest/server");
 
         CountDownLatch serverDown = new CountDownLatch(1);
-        EventHandler customWSEventHandler = new EventHandler () {
+        CountDownLatch kieServerTemplateUp = new CountDownLatch(1);
+        CountDownLatch kieServerInstanceUp = new CountDownLatch(1);
+        EventHandler customWSEventHandler = new EventHandler() {
 
             @Override
             public void onServerInstanceConnected(ServerInstanceConnected serverInstanceConnected) {
@@ -130,7 +130,7 @@ public class StandaloneControllerMultinodeIT extends AbstractControllerIT {
             }
 
             @Override
-            public void onServerInstanceDeleted(ServerInstanceDeleted serverInstanceDeleted) {       
+            public void onServerInstanceDeleted(ServerInstanceDeleted serverInstanceDeleted) {
                 LOGGER.info("onServerInstanceDeleted :" + serverInstanceDeleted);
             }
 
@@ -148,18 +148,19 @@ public class StandaloneControllerMultinodeIT extends AbstractControllerIT {
             @Override
             public void onServerTemplateUpdated(ServerTemplateUpdated serverTemplateUpdated) {
                 LOGGER.info("onServerTemplateUpdated :" + serverTemplateUpdated);
+                kieServerTemplateUp.countDown();
             }
 
             @Override
             public void onServerInstanceUpdated(ServerInstanceUpdated serverInstanceUpdated) {
                 LOGGER.info("onServerInstanceUpdated :" + serverInstanceUpdated);
+                kieServerInstanceUp.countDown();
             }
 
             @Override
-            public void onContainerSpecUpdated(ContainerSpecUpdated containerSpecUpdated) {   
+            public void onContainerSpecUpdated(ContainerSpecUpdated containerSpecUpdated) {
                 LOGGER.info("onContainerSpecUpdated :" + containerSpecUpdated);
             }
-            
         };
 
         deployer.deploy("kie-server");
@@ -173,23 +174,10 @@ public class StandaloneControllerMultinodeIT extends AbstractControllerIT {
                                                                                                                                                   USER,
                                                                                                                                                   PASSWORD,
                                                                                                                                                   customWSEventHandler)) {
-            // get all the instances connected to the controller
-            int count = 0;
-
-            ServerTemplateList templates = client.listServerTemplates();
-            while (!findServerTemplate(templates.getServerTemplates(), KIE_SERVER_ID)) {
-                Thread.sleep(500L);
-                templates = client.listServerTemplates();
-                LOGGER.info("try #{} templates", ++count);
-            }
+            kieServerTemplateUp.await(100, TimeUnit.SECONDS);
+            kieServerInstanceUp.await(100, TimeUnit.SECONDS);
 
             ServerInstanceKeyList list = client.getServerInstances(KIE_SERVER_ID);
-            while (list.getServerInstanceKeys().length == 0) {
-                Thread.sleep(500L);
-                list = client.getServerInstances(KIE_SERVER_ID);
-                LOGGER.info("try #{} instances", ++count);
-            }
-
 
             assertEquals(1, list.getServerInstanceKeys().length);
 
@@ -203,21 +191,7 @@ public class StandaloneControllerMultinodeIT extends AbstractControllerIT {
             list = client.getServerInstances(KIE_SERVER_ID);
 
             assertEquals(0, list.getServerInstanceKeys().length);
-
         }
-    }
-
-    private boolean findServerTemplate(ServerTemplate[] templates, String templateId) {
-        if (templates.length == 0) {
-            return false;
-        }
-
-        for (ServerTemplate template : templates) {
-            if (template.getId().equals(templateId)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private boolean ping(URL url) {

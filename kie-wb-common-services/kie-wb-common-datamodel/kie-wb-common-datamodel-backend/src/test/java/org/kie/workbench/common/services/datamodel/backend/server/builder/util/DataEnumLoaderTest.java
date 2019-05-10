@@ -21,9 +21,8 @@ import org.junit.Test;
 import org.kie.soup.project.datamodel.commons.util.RawMVELEvaluator;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.jgroups.util.Util.assertEquals;
-import static org.jgroups.util.Util.assertFalse;
-import static org.jgroups.util.Util.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * DataEnumLoader tests

@@ -44,6 +44,9 @@ import static org.mockito.Mockito.when;
 public class TreeListItemViewTest {
 
     @Mock
+    private HTMLDivElement root;
+
+    @Mock
     private HTMLDivElement itemHeader;
 
     @Mock
@@ -65,7 +68,8 @@ public class TreeListItemViewTest {
 
     @Before
     public void setup() {
-        itemView = spy(new TreeListItemView(itemHeader,
+        itemView = spy(new TreeListItemView(root,
+                                            itemHeader,
                                             itemsContainer,
                                             itemDetails,
                                             expandContainer,

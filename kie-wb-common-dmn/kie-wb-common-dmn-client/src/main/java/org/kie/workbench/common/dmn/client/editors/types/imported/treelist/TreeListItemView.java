@@ -39,6 +39,9 @@ public class TreeListItemView implements TreeListItem.View {
 
     private TreeListItem presenter;
 
+    @DataField("item-root")
+    private final HTMLDivElement root;
+
     @DataField("item-header")
     private final HTMLDivElement itemHeader;
 
@@ -58,12 +61,14 @@ public class TreeListItemView implements TreeListItem.View {
     private final HTMLInputElement checkbox;
 
     @Inject
-    public TreeListItemView(final HTMLDivElement itemHeader,
+    public TreeListItemView(final HTMLDivElement root,
+                            final HTMLDivElement itemHeader,
                             final HTMLDivElement itemsContainer,
                             final HTMLDivElement itemDetails,
                             final HTMLDivElement expandContainer,
                             @Named("span") final HTMLElement expand,
                             final HTMLInputElement checkbox) {
+        this.root = root;
         this.itemHeader = itemHeader;
         this.itemsContainer = itemsContainer;
         this.itemDetails = itemDetails;
@@ -133,5 +138,10 @@ public class TreeListItemView implements TreeListItem.View {
         for (final TreeListSubItem sub : item.getSubItems()) {
             itemsContainer.appendChild(sub.getElement());
         }
+    }
+
+    @Override
+    public HTMLElement getElement() {
+        return root;
     }
 }

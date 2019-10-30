@@ -20,7 +20,6 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import elemental2.dom.Node;
-import org.jboss.errai.ui.client.local.api.elemental2.IsElement;
 import org.uberfire.client.mvp.UberElemental;
 
 @Dependent
@@ -58,8 +57,7 @@ public class TreeListSubItem {
         return view.getElement();
     }
 
-    public interface View extends UberElemental<TreeListSubItem>,
-                                  IsElement {
+    public interface View extends UberElemental<TreeListSubItem> {
 
         void setDescription(final String description);
 

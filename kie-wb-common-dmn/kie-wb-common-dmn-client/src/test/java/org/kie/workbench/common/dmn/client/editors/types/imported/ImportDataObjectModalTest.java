@@ -24,9 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kie.workbench.common.dmn.api.editors.types.DataObject;
-import org.kie.workbench.common.dmn.client.service.DMNClientServicesProxy;
-import org.kie.workbench.common.stunner.core.client.api.SessionManager;
-import org.kie.workbench.common.stunner.core.client.service.ServiceCallback;
+import org.kie.workbench.common.dmn.client.api.dataobjects.DMNDataObjectsClient;
 import org.mockito.Mock;
 
 import static org.mockito.Mockito.doNothing;
@@ -43,40 +41,24 @@ public class ImportDataObjectModalTest {
     private ImportDataObjectModal.View view;
 
     @Mock
-    private DMNClientServicesProxy client;
-
-    @Mock
-    private SessionManager sessionManager;
+    private DMNDataObjectsClient client;
 
     private ImportDataObjectModal modal;
 
     @Before
     public void setup() {
-        modal = spy(new ImportDataObjectModal(view, client, sessionManager));
+        modal = spy(new ImportDataObjectModal(view, client));
     }
 
     @Test
     public void testShow() {
 
         final Consumer consumer = mock(Consumer.class);
-        final ServiceCallback serviceCallback = mock(ServiceCallback.class);
-        doReturn(serviceCallback).when(modal).wrap(consumer);
         doReturn(consumer).when(modal).getConsumer();
 
         modal.show();
 
-        verify(client).loadDataObjects(serviceCallback);
-    }
-
-    @Test
-    public void testWrap() {
-
-        final Consumer consumer = mock(Consumer.class);
-        final ServiceCallback service = modal.wrap(consumer);
-        final List<DataObject> items = mock(List.class);
-        service.onSuccess(items);
-
-        verify(consumer).accept(items);
+        verify(client).loadDataObjects(consumer);
     }
 
     @Test

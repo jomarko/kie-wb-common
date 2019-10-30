@@ -23,44 +23,24 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import org.kie.workbench.common.dmn.api.editors.types.DataObject;
-import org.kie.workbench.common.dmn.client.service.DMNClientServicesProxy;
-import org.kie.workbench.common.stunner.core.client.api.SessionManager;
-import org.kie.workbench.common.stunner.core.client.service.ClientRuntimeError;
-import org.kie.workbench.common.stunner.core.client.service.ServiceCallback;
+import org.kie.workbench.common.dmn.client.api.dataobjects.DMNDataObjectsClient;
 import org.uberfire.ext.editor.commons.client.file.popups.elemental2.Elemental2Modal;
 
 @Dependent
 public class ImportDataObjectModal extends Elemental2Modal<ImportDataObjectModal.View> {
 
-    private final DMNClientServicesProxy client;
-    private final SessionManager sessionManager;
+    private final DMNDataObjectsClient client;
 
     @Inject
     public ImportDataObjectModal(final View view,
-                                 final DMNClientServicesProxy client,
-                                 final SessionManager sessionManager) {
+                                 final DMNDataObjectsClient client) {
         super(view);
         this.client = client;
-        this.sessionManager = sessionManager;
     }
 
+    @Override
     public void show() {
-        client.loadDataObjects(wrap(getConsumer()));
-    }
-
-    ServiceCallback<List<DataObject>> wrap(final Consumer<List<DataObject>> consumer) {
-        return new ServiceCallback<List<DataObject>>() {
-
-            @Override
-            public void onSuccess(final List<DataObject> items) {
-                consumer.accept(items);
-            }
-
-            @Override
-            public void onError(final ClientRuntimeError error) {
-                // do nothing.
-            }
-        };
+        client.loadDataObjects(getConsumer());
     }
 
     Consumer<List<DataObject>> getConsumer() {
@@ -68,6 +48,8 @@ public class ImportDataObjectModal extends Elemental2Modal<ImportDataObjectModal
             getView().clear();
             if (!objects.isEmpty()) {
                 getView().addItems(objects);
+            } else {
+                getView().clear();
             }
             superShow();
         };

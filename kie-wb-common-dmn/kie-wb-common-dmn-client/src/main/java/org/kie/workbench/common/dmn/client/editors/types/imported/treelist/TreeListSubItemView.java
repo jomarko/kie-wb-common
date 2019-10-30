@@ -20,6 +20,7 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import elemental2.dom.HTMLDivElement;
 import elemental2.dom.HTMLElement;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
@@ -30,6 +31,9 @@ public class TreeListSubItemView implements TreeListSubItem.View {
 
     private TreeListSubItem presenter;
 
+    @DataField("sub-item-root")
+    private final HTMLDivElement root;
+
     @DataField("description")
     private final HTMLElement description;
 
@@ -37,8 +41,10 @@ public class TreeListSubItemView implements TreeListSubItem.View {
     private final HTMLElement details;
 
     @Inject
-    public TreeListSubItemView(@Named("span") final HTMLElement description,
+    public TreeListSubItemView(final HTMLDivElement root,
+                               @Named("span") final HTMLElement description,
                                @Named("span") final HTMLElement details) {
+        this.root = root;
         this.description = description;
         this.details = details;
     }
@@ -56,5 +62,10 @@ public class TreeListSubItemView implements TreeListSubItem.View {
     @Override
     public void setDetails(final String complement) {
         this.details.textContent = complement;
+    }
+
+    @Override
+    public HTMLElement getElement() {
+        return root;
     }
 }

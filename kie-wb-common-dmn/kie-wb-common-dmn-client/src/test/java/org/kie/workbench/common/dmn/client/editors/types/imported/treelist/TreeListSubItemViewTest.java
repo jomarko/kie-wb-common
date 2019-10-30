@@ -16,6 +16,7 @@
 
 package org.kie.workbench.common.dmn.client.editors.types.imported.treelist;
 
+import elemental2.dom.HTMLDivElement;
 import elemental2.dom.HTMLElement;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,6 +30,9 @@ import static org.junit.Assert.assertEquals;
 public class TreeListSubItemViewTest {
 
     @Mock
+    private HTMLDivElement root;
+
+    @Mock
     private HTMLElement description;
 
     @Mock
@@ -38,7 +42,7 @@ public class TreeListSubItemViewTest {
 
     @Before
     public void setup() {
-        view = new TreeListSubItemView(description, details);
+        view = new TreeListSubItemView(root, description, details);
     }
 
     @Test

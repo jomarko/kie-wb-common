@@ -18,6 +18,7 @@ package org.kie.workbench.common.stunner.bpmn.client.workitem;
 
 import java.util.List;
 
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.kie.workbench.common.stunner.bpmn.workitem.WorkItemDefinition;
 
@@ -120,6 +121,24 @@ public class WorkItemDefinitionParserTest {
                               "      ]\n" +
                               "  ]";
 
+    final static String INVALID_WID = "  [\n" +
+            "    [\n" +
+            "      \"name\" : \"Email\",\n" +
+            "      \"parameters\" : [\n" +
+            "        \"From\" : new StringDataType(),\n" +
+            "        \"To\" : new StringDataType(),\n" +
+            "        \"Subject\" : new StringDataType(),\n" +
+            "        \"Body\" : new StringDataType()\n" +
+            "      !!! BROKEN !!!,\n" +
+            "      \"displayName\" : \"Email\",\n" +
+            "      \"icon\" : \"defaultemailicon.gif\"\n" +
+            "    ]\n" +
+            "  ]";
+
+    final static String WID_ONE_LINER = "  [[\"name\" : \"Email\",\"parameters\" : [\"From\" : new StringDataType()," +
+            "\"To\" : new StringDataType(),\"Subject\" : new StringDataType(),\"Body\" : new StringDataType()]," +
+            "\"displayName\" : \"Email\",\"icon\" : \"defaultemailicon.gif\"]]";
+
     final static String EMAIL_WID_EXTRACTED_PARAMETERS = "\"From\" : new StringDataType(),\"To\" : new StringDataType()," +
                                                          "\"Subject\" : new StringDataType(),\"Body\" : new StringDataType()";
 
@@ -140,6 +159,18 @@ public class WorkItemDefinitionParserTest {
         assertTrue(defs.isEmpty());
         defs = parser.parse(null);
         assertTrue(defs.isEmpty());
+    }
+
+    @Test
+    public void testUnclosedBracketsWid() {
+        List<WorkItemDefinition> definitions = parser.parse(INVALID_WID);
+        Assertions.assertThat(definitions).isEmpty();
+    }
+
+    @Test
+    public void testWidOneLiner() {
+        List<WorkItemDefinition> definitions = parser.parse(WID_ONE_LINER);
+        Assertions.assertThat(definitions).hasSize(1);
     }
 
     @Test

@@ -29,14 +29,22 @@ public class OverviewWidgetViewImplTest {
 
     @Test
     public void showVersionHistory() {
-        final OverviewWidgetViewImpl overviewWidgetView = new OverviewWidgetViewImpl();
+        final TabListItem modelTabListItem = mock(TabListItem.class);
+        doReturn("Model").when(modelTabListItem).getTitle();
+        final TabListItem overviewTabListItem = mock(TabListItem.class);
+        doReturn("Overview").when(overviewTabListItem).getTitle();
+
         final NavTabs navTabs = mock(NavTabs.class);
-        final TabListItem tabListItem = mock(TabListItem.class);
-        doReturn(tabListItem).when(navTabs).getWidget(0);
+        doReturn(2).when(navTabs).getWidgetCount();
+        doReturn(modelTabListItem).when(navTabs).getWidget(0);
+        doReturn(overviewTabListItem).when(navTabs).getWidget(1);
+
+        final OverviewWidgetViewImpl overviewWidgetView = new OverviewWidgetViewImpl();
         overviewWidgetView.navTabs = navTabs;
 
         overviewWidgetView.showVersionHistory();
 
-        verify(tabListItem).showTab();
+        verify(overviewTabListItem).showTab();
+        verify(modelTabListItem, never()).showTab();
     }
 }

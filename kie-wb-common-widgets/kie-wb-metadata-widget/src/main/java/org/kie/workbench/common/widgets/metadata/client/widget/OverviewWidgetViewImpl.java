@@ -17,6 +17,8 @@
 package org.kie.workbench.common.widgets.metadata.client.widget;
 
 import java.util.Date;
+import java.util.Objects;
+
 import javax.inject.Inject;
 
 import com.google.gwt.core.client.GWT;
@@ -35,6 +37,7 @@ import org.gwtbootstrap3.client.ui.TabListItem;
 import org.gwtbootstrap3.client.ui.TabPane;
 import org.gwtbootstrap3.client.ui.TextArea;
 import org.kie.workbench.common.widgets.client.discussion.DiscussionWidgetPresenter;
+import org.kie.workbench.common.widgets.client.resources.i18n.CommonConstants;
 import org.kie.workbench.common.widgets.metadata.client.resources.i18n.MetadataConstants;
 import org.uberfire.backend.vfs.Path;
 import org.uberfire.backend.vfs.impl.LockInfo;
@@ -48,7 +51,6 @@ public class OverviewWidgetViewImpl
         extends Composite
         implements OverviewScreenView {
 
-    private static final int VERSION_HISTORY_TAB = 0;
     private static Binder uiBinder = GWT.create(Binder.class);
 
     interface Binder
@@ -188,7 +190,16 @@ public class OverviewWidgetViewImpl
 
     @Override
     public void showVersionHistory() {
-        ((TabListItem) navTabs.getWidget(VERSION_HISTORY_TAB)).showTab();
+        final int tabsCount = navTabs.getWidgetCount();
+        for (int tabIndex = 0; tabIndex < tabsCount; tabIndex++) {
+            if (navTabs.getWidget(tabIndex) instanceof TabListItem) {
+                final TabListItem tab = (TabListItem) navTabs.getWidget(tabIndex);
+                if (Objects.equals(tab.getTitle(), CommonConstants.INSTANCE.Overview())) {
+                    tab.showTab();
+                    break;
+                }
+            }
+        }
     }
 
     @Override

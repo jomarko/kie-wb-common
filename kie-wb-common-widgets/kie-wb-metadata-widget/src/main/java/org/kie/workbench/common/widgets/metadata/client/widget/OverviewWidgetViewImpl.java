@@ -194,7 +194,7 @@ public class OverviewWidgetViewImpl
         for (int tabIndex = 0; tabIndex < tabsCount; tabIndex++) {
             if (navTabs.getWidget(tabIndex) instanceof TabListItem) {
                 final TabListItem tab = (TabListItem) navTabs.getWidget(tabIndex);
-                if (Objects.equals(tab.getTitle(), CommonConstants.INSTANCE.Overview())) {
+                if (Objects.equals(tab.getText(), CommonConstants.INSTANCE.Overview())) {
                     tab.showTab();
                     break;
                 }

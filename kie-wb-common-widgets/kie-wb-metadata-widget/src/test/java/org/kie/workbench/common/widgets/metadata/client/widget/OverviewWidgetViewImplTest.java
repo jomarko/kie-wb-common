@@ -30,9 +30,9 @@ public class OverviewWidgetViewImplTest {
     @Test
     public void showVersionHistory() {
         final TabListItem modelTabListItem = mock(TabListItem.class);
-        doReturn("Model").when(modelTabListItem).getTitle();
+        doReturn("Model").when(modelTabListItem).getText();
         final TabListItem overviewTabListItem = mock(TabListItem.class);
-        doReturn("Overview").when(overviewTabListItem).getTitle();
+        doReturn("Overview").when(overviewTabListItem).getText();
 
         final NavTabs navTabs = mock(NavTabs.class);
         doReturn(2).when(navTabs).getWidgetCount();

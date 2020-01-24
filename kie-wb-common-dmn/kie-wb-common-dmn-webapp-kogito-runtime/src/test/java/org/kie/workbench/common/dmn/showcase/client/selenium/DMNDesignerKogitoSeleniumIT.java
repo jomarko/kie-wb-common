@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
@@ -35,6 +36,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.xmlunit.assertj.XmlAssert;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
@@ -48,6 +50,9 @@ public class DMNDesignerKogitoSeleniumIT {
 
     private static final String SET_CONTENT_TEMPLATE =
             "gwtEditorBeans.get(\"DMNDiagramEditor\").get().setContent(\"\",\"%s\")";
+
+    private static final String GET_CONTENT_TEMPLATE =
+            "return gwtEditorBeans.get(\"DMNDiagramEditor\").get().getContent()";
 
     private static final String INDEX_HTML = "target/kie-wb-common-dmn-webapp-kogito-runtime/index.html";
     private static final String INDEX_HTML_PATH = "file:///" + new File(INDEX_HTML).getAbsolutePath();
@@ -87,11 +92,108 @@ public class DMNDesignerKogitoSeleniumIT {
     }
 
     @Test
+    public void testNewDiagram() throws Exception {
+        final String expected = loadResource("new-diagram.xml");
+        setContent("");
+
+        final String actual = getContent();
+        assertThat(actual).isNotBlank();
+
+        //Skip, id, name and namespace in the comparison as they are dynamically created at runtime
+        XmlAssert.assertThat(actual).and(expected)
+                .ignoreComments()
+                .ignoreWhitespace()
+                .withAttributeFilter(attr -> !(Objects.equals(attr.getName(), "id")
+                        || Objects.equals(attr.getName(), "name")
+                        || Objects.equals(attr.getName(), "namespace")))
+                .areIdentical();
+    }
+
+    @Test
     public void testBasicModel() throws Exception {
-        setContent("basic-model.dmn");
+        final String expected = loadResource("basic-model.xml");
+        setContent(expected);
 
         assertDiagramNodeIsPresent("CurrentIndex");
         assertDiagramNodeIsPresent("NextIndex");
+
+        final String actual = getContent();
+        assertThat(actual).isNotBlank();
+
+        XmlAssert.assertThat(actual).and(expected)
+                .ignoreComments()
+                .ignoreWhitespace()
+                .areIdentical();
+    }
+
+    @Test
+    public void testBusinessKnowledgeModel() throws Exception {
+        final String expected = loadResource("business-knowledge-model.xml");
+        setContent(expected);
+
+        final String actual = getContent();
+        assertThat(actual).isNotBlank();
+
+        XmlAssert.assertThat(actual).and(expected)
+                .ignoreComments()
+                .ignoreWhitespace()
+                .areIdentical();
+    }
+
+    @Test
+    public void testInputData() throws Exception {
+        final String expected = loadResource("input-data.xml");
+        setContent(expected);
+
+        final String actual = getContent();
+        assertThat(actual).isNotBlank();
+
+        XmlAssert.assertThat(actual).and(expected)
+                .ignoreComments()
+                .ignoreWhitespace()
+                .areIdentical();
+    }
+
+    @Test
+    public void testKnowledgeSource() throws Exception {
+        final String expected = loadResource("knowledge-source.xml");
+        setContent(expected);
+
+        final String actual = getContent();
+        assertThat(actual).isNotBlank();
+
+        XmlAssert.assertThat(actual).and(expected)
+                .ignoreComments()
+                .ignoreWhitespace()
+                .areIdentical();
+    }
+
+    @Test
+    public void testDecisionEmpty() throws Exception {
+        final String expected = loadResource("decision-empty.xml");
+        setContent(expected);
+
+        final String actual = getContent();
+        assertThat(actual).isNotBlank();
+
+        XmlAssert.assertThat(actual).and(expected)
+                .ignoreComments()
+                .ignoreWhitespace()
+                .areIdentical();
+    }
+
+    @Test
+    public void testDecisionServiceEmpty() throws Exception {
+        final String expected = loadResource("decision-service-empty.xml");
+        setContent(expected);
+
+        final String actual = getContent();
+        assertThat(actual).isNotBlank();
+
+        XmlAssert.assertThat(actual).and(expected)
+                .ignoreComments()
+                .ignoreWhitespace()
+                .areIdentical();
     }
 
     private void assertDiagramNodeIsPresent(final String nodeName) {
@@ -105,6 +207,21 @@ public class DMNDesignerKogitoSeleniumIT {
         toggleDecisionNavigator();
     }
 
+    private void setContent(final String xml) {
+        ((JavascriptExecutor) driver).executeScript(String.format(SET_CONTENT_TEMPLATE, xml));
+        final WebElement designer = waitOperation()
+                .until(visibilityOfElementLocated(By.className("uf-multi-page-editor")));
+        assertThat(designer)
+                .as("Designer was not loaded")
+                .isNotNull();
+    }
+
+    private String getContent() {
+        final Object result = ((JavascriptExecutor) driver).executeScript(String.format(GET_CONTENT_TEMPLATE));
+        assertThat(result).isInstanceOf(String.class);
+        return (String) result;
+    }
+
     /**
      * Use this for loading DMN model placed in src/test/resources
      * @param filename
@@ -114,16 +231,7 @@ public class DMNDesignerKogitoSeleniumIT {
     private String loadResource(final String filename) throws IOException {
         return IOUtils.readLines(this.getClass().getResourceAsStream(filename), StandardCharsets.UTF_8)
                 .stream()
-                .collect(Collectors.joining(System.lineSeparator()));
-    }
-
-    private void setContent(final String fileName) throws IOException {
-        ((JavascriptExecutor) driver).executeScript(String.format(SET_CONTENT_TEMPLATE, loadResource(fileName)));
-        final WebElement designer = waitOperation()
-                .until(visibilityOfElementLocated(By.className("uf-multi-page-editor")));
-        assertThat(designer)
-                .as("Designer was not loaded")
-                .isNotNull();
+                .collect(Collectors.joining(""));
     }
 
     private void toggleDecisionNavigator() {

@@ -54,7 +54,7 @@ public abstract class AbstractDiagramEditorMenuSessionItems<BUILDER extends Abst
 
     private final BUILDER itemsBuilder;
     private final Map<Class<? extends ClientSessionCommand>, MenuItem> menuItems;
-    private final EditorSessionCommands sessionCommands;
+    protected final EditorSessionCommands sessionCommands;
 
     private Command loadingStarts;
     private Command loadingCompleted;
@@ -191,7 +191,7 @@ public abstract class AbstractDiagramEditorMenuSessionItems<BUILDER extends Abst
         this.menuItems.put(clazz, menuItem);
     }
 
-    private void validate() {
+    protected void validate() {
         loadingStarts();
         sessionCommands.getValidateSessionCommand().execute(new ClientSessionCommand.Callback<Collection<DiagramElementViolation<RuleViolation>>>() {
             @Override

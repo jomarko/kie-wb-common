@@ -16,11 +16,16 @@
 
 package org.kie.workbench.common.dmn.project.client.editor;
 
+import java.util.ArrayList;
+import java.util.function.Consumer;
+
 import com.google.gwtmockito.GwtMockitoTestRunner;
+import org.guvnor.messageconsole.client.console.MessageConsoleScreen;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kie.workbench.common.dmn.client.widgets.toolbar.DMNPerformAutomaticLayoutCommand;
 import org.kie.workbench.common.dmn.project.client.session.DMNEditorSessionCommands;
+import org.kie.workbench.common.stunner.core.client.session.command.ClientSessionCommand;
 import org.kie.workbench.common.stunner.core.client.session.command.impl.ClearSessionCommand;
 import org.kie.workbench.common.stunner.core.client.session.command.impl.CopySelectionSessionCommand;
 import org.kie.workbench.common.stunner.core.client.session.command.impl.CutSelectionSessionCommand;
@@ -36,8 +41,13 @@ import org.kie.workbench.common.stunner.core.client.session.command.impl.SwitchG
 import org.kie.workbench.common.stunner.core.client.session.command.impl.UndoSessionCommand;
 import org.kie.workbench.common.stunner.core.client.session.command.impl.ValidateSessionCommand;
 import org.kie.workbench.common.stunner.core.client.session.command.impl.VisitGraphSessionCommand;
+import org.kie.workbench.common.stunner.core.rule.RuleViolation;
+import org.kie.workbench.common.stunner.core.validation.DiagramElementViolation;
 import org.kie.workbench.common.widgets.client.menu.FileMenuBuilder;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.uberfire.client.mvp.PlaceManager;
+import org.uberfire.mvp.Command;
 import org.uberfire.workbench.model.menu.MenuItem;
 
 import static org.mockito.Matchers.any;
@@ -59,10 +69,14 @@ public class DMNEditorMenuSessionItemsTest {
     @Mock
     private DMNEditorSessionCommands sessionCommands;
 
+    @Mock
+    private PlaceManager placeManager;
+
     @Test
     public void testPopulateMenu() {
 
-        final DMNEditorMenuSessionItems menuItems = spy(new DMNEditorMenuSessionItems(builder, sessionCommands));
+        placeManager = mock(PlaceManager.class);
+        final DMNEditorMenuSessionItems menuItems = spy(new DMNEditorMenuSessionItems(builder, sessionCommands, placeManager));
         final MenuItem menuItem = mock(MenuItem.class);
         doNothing().when(menuItems).superPopulateMenu(any());
         doReturn(menuItem).when(menuItems).newPerformAutomaticLayout();
@@ -83,7 +97,7 @@ public class DMNEditorMenuSessionItemsTest {
 
     private void testMenu(final boolean enabled) {
 
-        final DMNEditorMenuSessionItems menuItems = spy(new DMNEditorMenuSessionItems(builder, sessionCommands));
+        final DMNEditorMenuSessionItems menuItems = spy(new DMNEditorMenuSessionItems(builder, sessionCommands, mock(PlaceManager.class)));
 
         menuItems.setEnabled(enabled);
         verify(menuItems).setItemEnabled(ClearSessionCommand.class, enabled);
@@ -102,5 +116,57 @@ public class DMNEditorMenuSessionItemsTest {
         verify(menuItems).setItemEnabled(CutSelectionSessionCommand.class, false);
         verify(menuItems).setItemEnabled(PasteSelectionSessionCommand.class, false);
         verify(menuItems).setItemEnabled(DMNPerformAutomaticLayoutCommand.class, enabled);
+    }
+
+    @Test
+    public void validate() {
+
+        final PlaceManager placeManager = mock(PlaceManager.class);
+        final DMNEditorMenuSessionItems menuItems = spy(new DMNEditorMenuSessionItems(builder,
+                                                                                      sessionCommands,
+                                                                                      placeManager));
+        final Command loadingStarts = mock(Command.class);
+        menuItems.setLoadingStarts(loadingStarts);
+        final Command loadingCompleted = mock(Command.class);
+        menuItems.setLoadingCompleted(loadingCompleted);
+        final ValidateSessionCommand validateSessionCommand = mock(ValidateSessionCommand.class);
+        doReturn(validateSessionCommand).when(sessionCommands).getValidateSessionCommand();
+        final ArgumentCaptor<ClientSessionCommand.Callback> argumentCaptor = ArgumentCaptor.forClass(ClientSessionCommand.Callback.class);
+
+        menuItems.validate();
+
+        verify(validateSessionCommand).execute(argumentCaptor.capture());
+
+        argumentCaptor.getValue().onSuccess();
+
+        verify(placeManager).goTo(MessageConsoleScreen.ALERTS);
+        verify(loadingStarts).execute();
+        verify(loadingCompleted).execute();
+    }
+
+    @Test
+    public void validateOnError() {
+
+        final PlaceManager placeManager = mock(PlaceManager.class);
+        final DMNEditorMenuSessionItems menuItems = spy(new DMNEditorMenuSessionItems(builder,
+                                                                                      sessionCommands,
+                                                                                      placeManager));
+        final ArgumentCaptor<ClientSessionCommand.Callback> argumentCaptor = ArgumentCaptor.forClass(ClientSessionCommand.Callback.class);
+        final ValidateSessionCommand validateSessionCommand = mock(ValidateSessionCommand.class);
+        doReturn(validateSessionCommand).when(sessionCommands).getValidateSessionCommand();
+        final Consumer errorConsumer = mock(Consumer.class);
+        menuItems.setErrorConsumer(errorConsumer);
+
+        menuItems.validate();
+
+        verify(validateSessionCommand).execute(argumentCaptor.capture());
+
+        final ArrayList<DiagramElementViolation<RuleViolation>> violations = new ArrayList<>();
+        final DiagramElementViolation diagramElementViolation = mock(DiagramElementViolation.class);
+        doReturn("violation").when(diagramElementViolation).toString();
+        violations.add(diagramElementViolation);
+        argumentCaptor.getValue().onError(violations);
+
+        verify(errorConsumer).accept(violations.toString());
     }
 }

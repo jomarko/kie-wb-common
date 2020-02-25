@@ -191,7 +191,7 @@ public abstract class AbstractDiagramEditorMenuSessionItems<BUILDER extends Abst
         this.menuItems.put(clazz, menuItem);
     }
 
-    protected void validate() {
+    private void validate() {
         loadingStarts();
         sessionCommands.getValidateSessionCommand().execute(new ClientSessionCommand.Callback<Collection<DiagramElementViolation<RuleViolation>>>() {
             @Override

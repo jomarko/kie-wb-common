@@ -43,15 +43,11 @@ import org.uberfire.workbench.model.menu.MenuItem;
 @Typed(DMNEditorMenuSessionItems.class)
 public class DMNEditorMenuSessionItems extends AbstractDiagramEditorMenuSessionItems<DMNEditorMenuItemsBuilder> {
 
-    private final PlaceManager placeManager;
-
     @Inject
     public DMNEditorMenuSessionItems(final DMNEditorMenuItemsBuilder itemsBuilder,
-                                     final @DMNEditor DMNEditorSessionCommands sessionCommands,
-                                     final PlaceManager placeManager) {
+                                     final @DMNEditor DMNEditorSessionCommands sessionCommands) {
         super(itemsBuilder,
               sessionCommands);
-        this.placeManager = placeManager;
     }
 
     @Override
@@ -88,22 +84,5 @@ public class DMNEditorMenuSessionItems extends AbstractDiagramEditorMenuSessionI
 
     void superSetEnabled(final boolean enabled) {
         super.setEnabled(enabled);
-    }
-
-    @Override
-    protected void validate() {
-        loadingStarts();
-        sessionCommands.getValidateSessionCommand().execute(new ClientSessionCommand.Callback<Collection<DiagramElementViolation<RuleViolation>>>() {
-            @Override
-            public void onSuccess() {
-                placeManager.goTo(MessageConsoleScreen.ALERTS);
-                loadingCompleted();
-            }
-
-            @Override
-            public void onError(final Collection<DiagramElementViolation<RuleViolation>> violations) {
-                DMNEditorMenuSessionItems.this.onError(violations.toString());
-            }
-        });
     }
 }

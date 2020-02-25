@@ -31,6 +31,7 @@ import com.google.gwt.user.client.ui.IsWidget;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.HTMLElement;
 import org.guvnor.common.services.shared.metadata.model.Overview;
+import org.guvnor.messageconsole.client.console.MessageConsoleScreen;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.ui.ElementWrapperWidget;
 import org.jboss.errai.ioc.client.api.ManagedInstance;
@@ -195,6 +196,10 @@ public class DMNDiagramEditor extends AbstractProjectDiagramEditor<DMNDiagramRes
     public void init() {
         super.init();
         getMenuSessionItems().setErrorConsumer(e -> hideLoadingViews());
+        getMenuSessionItems().setLoadingCompleted(() -> {
+            placeManager.goTo(MessageConsoleScreen.ALERTS);
+            hideLoadingViews();
+        });
         editorSearchIndex.setCurrentAssetHashcodeSupplier(getGetCurrentContentHashSupplier());
         editorSearchIndex.setIsDataTypesTabActiveSupplier(getIsDataTypesTabActiveSupplier());
         feelInitializer.initializeFEELEditor();

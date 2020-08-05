@@ -40,6 +40,6 @@ public class ReadOnlyProviderImpl implements ReadOnlyProvider {
 
     @Override
     public boolean isReadOnlyDiagram() {
-        return false;
+        return contextProvider != null && contextProvider.getChannel() == GITHUB;
     }
 }
